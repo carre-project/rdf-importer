@@ -28,7 +28,7 @@
     <div class="col-xs-12">
       <div class="alerts">
         <div class="alert alert-dismissible" ng-class="message_color" role="alert"  ng-show="message">
-          <button type="button" ng-click="resetScope()" class="close" aria-label="Close"><span class="glyphicon glyphicon-remove"></span></button>
+          <button type="button" ng-click="message=null" class="close" aria-label="Close"><span class="glyphicon glyphicon-remove"></span></button>
           <span ng-bind-html="message"></span>
         </div>
       </div>

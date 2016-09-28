@@ -73,8 +73,11 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
 
   $scope.resetScope = function() {
     $('.import').hide(500);
-    $scope.message=null;
-  };
+    $('.progress-bar').text('0%');
+    $('.progress-bar').width('0%');
+    $scope.currentFile = null;
+    $('#upload-input').val('');
+  }
   $scope.resetScope();
   
   $scope.uploadFile = function() {
