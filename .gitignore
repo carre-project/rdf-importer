@@ -31,5 +31,6 @@ node_modules
 
 # Optional REPL history
 .node_repl_history
-sqlite
+
+sqlite/data.db
 uploads
