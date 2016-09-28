@@ -1,0 +1,89 @@
+{
+	"sparql_endpoint":"https://devices.vulsk.carre-project.eu/sparql-auth",
+	"target_graph":"http://carre.kmi.open.ac.uk/public",
+	"excel_file":"risk_entry_system_v27_fix_bug_obs.xlsx",
+	"insert_to_rdf":true,
+	"prefixes":[
+		"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",
+		"PREFIX umlsCUI: <http://umls.nlm.nih.gov/sab/mth/cui/>",
+		"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+		"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>",
+		"PREFIX sensors: <http://carre.kmi.open.ac.uk/ontology/sensors.owl#>",
+		"PREFIX risk: <http://carre.kmi.open.ac.uk/ontology/risk.owl#>",
+		"PREFIX dss: <http://carre.kmi.open.ac.uk/ontology/dss.owl#>",
+		"PREFIX riskInst: <http://carre.kmi.open.ac.uk/>",
+		"PREFIX carreManufacturer: <http://carre.kmi.open.ac.uk/manufacturers/>",
+		"PREFIX carreUsers: <https://carre.kmi.open.ac.uk/users/>"
+	],
+	"condition_fields":[
+		"risk:has_observable_condition",
+		"dss:has_risk_alarm_condition",
+		"dss:has_risk_alert_condition",
+		"dss:has_enum_condition"
+	],
+	"condition_contains":[
+		"observables",
+		"calculated_observables",
+		"calculated_observables",
+		"observables"
+	],
+	"excel_sheets":[
+		"meas_type_name",
+		"observables",
+		"risk_elements",
+		"risk_factors",
+		"citations",
+		"risk_evidences",
+		"medical_experts",
+		"!calculated_enums",
+		"!calculated_observables",
+		"!dss_messages",
+		"!risk_alarms",
+		"!risk_alerts"
+	],
+	"type_name":[
+		"risk:measurement_type",
+		"risk:observable",
+		"risk:risk_element",
+		"risk:risk_factor",
+		"risk:citation",
+		"risk:risk_evidence",
+		"risk:medical_expert",  
+		"!dss:calculated_enum",
+		"!dss:calculated_observable",
+		"!dss:dss_message",
+		"!dss:risk_alarm",
+		"!dss:risk_alert"
+	],
+	"enums":[
+		"no",
+		"yes",
+		"mild",
+		"moderate",
+		"severe",
+		"stage1",
+		"stage2",
+		"stage3",
+		"stage3A",
+		"stage3B",
+		"stage4",
+		"stage5",
+		"female",
+		"male",
+		"other",
+		"never",
+		"smoker",
+		"ex-smoker",
+
+		"low",
+		"high",
+
+		"maternal",
+		"paternal",
+		"atorvastatin",
+		"simvastatin",
+		"rosuvastatin",
+		"pravastatin",
+		"lovastatin"
+	]
+}

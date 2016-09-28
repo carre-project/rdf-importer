@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html ng-app="rdfImporter">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>CARRE RDF Importer</title>
+  <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.rawgit.com/angular-ui/bower-ui-grid/v3.1.1/ui-grid.min.css">
+  <link href="css/styles.css" rel="stylesheet">
+</head>
+
+<body ng-controller="MyCtrl">
+
+  <!-- Fixed navbar -->
+  <nav class="navbar navbar-default">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">
+          <span class="glyphicon glyphicon-cloud-upload"></span> CARRE RDF<sub>importer</sub></a>
+      </div>
+    </div>
+  </nav>
+  <div class="container ng-cloak">
+    <div class="col-xs-12">
+      <div class="alerts">
+        <div class="alert alert-success alert-dismissible" role="alert"  ng-click="message=null" ng-show="message">
+          <button type="button" class="close" aria-label="Close"><span class="glyphicon glyphicon-remove"></span></button>
+          <span ng-bind-html="message"></span>
+        </div>
+      </div>
+
+    </div>
+    <div class="col-sm-4">
+      <div class "container">
+        <h4>Upload excel and import</h4>
+        <hr>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+
+            <div style="display:none" class="import panel-body">
+              <div class="form-group">
+                <!-- Message input !-->
+                <label class="control-label " for="deployment">Sparql Endpoint</label>
+                <select class="form-control" id="deployment">
+              			<option value="duth">Duth</option>
+              			<option value="vulsk">Vulsk</option>
+              		</select>
+
+                <label class="control-label " for="graph">Graph</label>
+                <select class="form-control" id="graph">
+              			<option value="dssdata">dssdata</option>
+              			<option value="riskdata">riskdata</option>
+              			<option value="public">public</option>
+              		</select>
+                <a id="import_btn" class="btn btn-success">Import Data</a>
+
+              </div>
+
+              <div class="text-center">
+                <img class="loading" src="35.gif">
+              </div>
+            </div>
+
+            <div class="progress">
+              <div class="progress-bar" role="progressbar"></div>
+            </div>
+            <button class="btn btn-lg btn-primary upload-btn" type="button">Upload <span class="glyphicon glyphicon-cloud-upload"></span></button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+    <div class="col-sm-8">
+      <div class "container" cg-busy="loading">
+        <h4>History</h4>
+        <hr>
+        <div ui-grid="gridOptions1" 
+        ui-grid-pagination 
+        ui-grid-cellNav 
+        ui-grid-edit 
+        ui-grid-resize-columns class="grid"></div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <input id="upload-input" type="file" name="uploads[]" multiple="multiple">
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-sanitize.min.js"></script>
+  <script src="https://cdn.rawgit.com/angular-ui/bower-ui-grid/v3.1.1/ui-grid.min.js"></script>
+  <script src="js/angular-busy.js"></script>
+  <script src="js/script.js"></script>
+</body>
+
+</html>
