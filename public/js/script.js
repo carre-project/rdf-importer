@@ -17,11 +17,6 @@ var app = angular.module('rdfImporter', [
 
 app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', function($scope, $http, $timeout,uiGridConstants) {
   
-  // $scope.$watch('gridOptions1.paginationPageSize',function(n,o){
-  //   console.log(n,o);
-  //   $scope.gridOptions1.minRowsToShow = n;
-  // });
-
   // id,file,deployment,graph,date,ip
   $scope.gridOptions1 = {
     enableColumnResizing: true,
@@ -68,11 +63,6 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
     d.getFullYear().toString().slice(2);
   }
 
-  $scope.addAlert = function(message) {
-    $scope.message=message;
-    $timeout(function(){$scope.message=null;},12000);
-  }
-
   $scope.fetchHistory = function() {
     $scope.loading=$http.get('/history').then(function(result) {
       console.log(result.data);
@@ -81,30 +71,30 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
   };
   $scope.fetchHistory();
 
-  var currentFile = "";
-  $('.upload-btn').on('click', function() {
+  $scope.resetScope = function() {
+    $('.import').hide(500);
+    $scope.message=null;
+  };
+  $scope.resetScope();
+  
+  $scope.uploadFile = function() {
     $('#upload-input').click();
-    $('.progress-bar').text('0%');
-    $('.progress-bar').width('0%');
-  });
-
-  $('#import_btn').on('click', function() {
-    $(".loading").show(500);
+  }
+  $scope.importData = function() {
     var selectedGraph = $("#graph").val();
     var selectedDeployment = $("#deployment").val();
-    console.log(selectedGraph)
-    $.get('/import?graph=' + selectedGraph + '&file=' + currentFile + '&deployment=' + selectedDeployment, null, function(res) {
-      console.log(res);
-      $timeout(function() {
-        $scope.fetchHistory()
-      }, 500);
-      $(".loading").hide(500);
-      $scope.addAlert(res.replace(/\n/g, "<br />"));
+    $scope.loading_import=$http.get('/import?graph=' + selectedGraph + '&file=' + $scope.currentFile + '&deployment=' + selectedDeployment).then(function(res){
+      $timeout(function() {$scope.fetchHistory()}, 100);
+      $scope.message_color="alert-"+res.data.type;
+      $scope.message=res.data.message.replace(/\n/g, "<br />");
     })
-  });
+    
+  };
 
   $('#upload-input').on('change', function() {
     var files = $(this).get(0).files;
+    $('.progress-bar').text('0%');
+    $('.progress-bar').width('0%');
     if (files.length > 0) {
       var formData = new FormData();
       for (var i = 0; i < files.length; i++) {
@@ -124,8 +114,8 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
         processData: false,
         contentType: false,
         success: function(data) {
-          currentFile = data.split(":")[1].split('.xls')[0];
-          $('.progress-bar').html(currentFile + '.' + $scope.ext);
+          $scope.currentFile = data.split(":")[1].split('.xls')[0];
+          $('.progress-bar').html($scope.currentFile + '.' + $scope.ext);
           $('.import').show(500);
         },
         xhr: function() {

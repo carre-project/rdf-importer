@@ -1,0 +1,13 @@
+{
+    apps: [{
+        name: "rdf_importer",
+        script: "app.js",
+        env:{
+            "AUTH_USER":"carre",
+            "AUTH_PASS":"c@rr3",
+            "PORT":9999
+        },
+        watch:["app.js"],
+        cwd: process.env.HOME + "/carre-rdfimport"
+    }]
+}

@@ -93,7 +93,7 @@ app.get('/import', function(req, res) {
   env.file = req.query.file;
   env.g = req.query.graph || "dssdata";
   env.d = req.query.deployment || "duth";
-  env.DBA_PASS = env.DBA_PASS || env.DBA_PASS;
+  env.DBA_PASS = env.DBA_PASS || env.AUTH_PASS;
   var command = spawn(__dirname + "/import.sh", { env: env });
   var output  = [];
 
@@ -104,12 +104,21 @@ app.get('/import', function(req, res) {
   command.on('close', function(code) {
     var decoder = new StringDecoder('utf8'); //'utf8'
     if (code === 0) {
-      res.send(decoder.write(Buffer.concat(output)));
-      saveImport({
-        file:env.file,
-        graph:env.g,
-        deployment:env.d
-      });
+      var response = decoder.write(Buffer.concat(output)).trim();
+      
+      // handle response type
+      var response_type = response.indexOf("Error")>=0?"warning":"success";
+      if(response_type==="success") {
+        res.status(200).json({type:response_type,message:response});
+        saveImport({
+          file:env.file,
+          graph:env.g,
+          deployment:env.d
+        });
+      } else {
+        res.status(200).json({type:response_type,message:response});
+      }
+      
     }
     else {
       res.send(500); // when the script fails, generate a Server Error HTTP response
