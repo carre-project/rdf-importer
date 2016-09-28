@@ -17,3 +17,7 @@ dokku storage:mount carre-rdfimporter /var/lib/dokku/data/storage/carre-rdfimpor
 
 # make symbolic link to home directory
 ln -s /var/lib/dokku/data/storage/carre-rdfimporter ~/carre-rdfimporter
+
+# from your local machine
+git remote add dokku dokku@dokku.me:carre-rdfimporter
+git push dokku master
