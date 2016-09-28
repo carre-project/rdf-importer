@@ -117,7 +117,7 @@ app.get('/import', function(req, res) {
   });
 });
 
-var server = app.listen(9999, function(){
+var server = app.listen(process.env.PORT, function(){
   console.log('Server listening on port 9999');
 });
 
