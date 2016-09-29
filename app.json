@@ -3,8 +3,9 @@
         name: "rdf_importer",
         script: "app.js",
         env:{
-            "AUTH_USER":"carre",
-            "AUTH_PASS":"c@rr3",
+            "AUTH_USER":"admin",
+            "AUTH_PASS":"d3m0",
+            "BETA":"true",
             "PORT":9999
         },
         watch:["app.js"],

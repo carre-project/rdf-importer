@@ -22,6 +22,7 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
     enableColumnResizing: true,
     enableFiltering: true,
     enableCellEdit:true,
+    enableSorting: true,
     paginationPageSizes: [10, 50, 100],
     paginationPageSize: 10,
     columnDefs: [{
@@ -36,11 +37,12 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
       name: 'graph',
       width: 80
     }, {
-      name: 'date',
+      name: 'date',  
       sort: {
         direction: uiGridConstants.DESC,
         priority: 0,
       },
+      sortingAlgorithm:customDateSorting,
       width: 130,
       cellTemplate: '<div class="ui-grid-cell-contents">{{grid.appScope.makeDate(row.entity.date)}}</div>'
     }, {
@@ -57,11 +59,30 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
     }]
   };
   
+  function customDateSorting(a, b, rowA, rowB, direction){
+    a = new Date(a).getTime()/1000;
+    b = new Date(b).getTime()/1000;
+    console.log(a,b,direction);
+    switch (direction) {
+      case uiGridConstants.DESC:
+        if (a == b) return 0;
+        if (a < b) return -1;
+        break;
+      case uiGridConstants.ASC:
+        if (a == b) return 0;
+        if (a > b) return -1;
+        break;
+      default:
+        // code
+    }
+    return 1;
+  }
+  
   $scope.makeDate = function (str){
     var d = new Date(str);
     return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2)+" "+ ("0" + d.getDate()).slice(-2) + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" +
     d.getFullYear().toString().slice(2);
-  }
+  };
 
   $scope.fetchHistory = function() {
     $scope.loading=$http.get('/history').then(function(result) {

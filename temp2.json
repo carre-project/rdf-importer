@@ -1,5 +1,5 @@
 {
-	"sparql_endpoint":"https://devices.duth.carre-project.eu/sparql-auth",
+	"sparql_endpoint":"https://devices.vulsk.carre-project.eu/sparql-auth",
 	"target_graph":"http://carre.kmi.open.ac.uk/dssdata",
 	"excel_file":"public/uploads/risk_entry_system_v26_5_all_riskAlerts.xlsx",
 	"insert_to_rdf":true,

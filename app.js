@@ -108,7 +108,7 @@ app.get('/import', function(req, res) {
       
       // handle response type
       var response_type = response.indexOf("Error")>=0?"warning":"success";
-      if(response_type==="success") {
+      if(response_type==="success" || process.env.BETA) {
         res.status(200).json({type:response_type,message:response});
         saveImport({
           file:env.file,
