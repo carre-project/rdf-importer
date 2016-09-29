@@ -9,15 +9,23 @@ var auth = require('basic-auth');
 var currentFilename="";
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('sqlite/data.db');
+var nodemailer = require('nodemailer');
+var sgTransport = require('nodemailer-sendgrid-transport');
 
 var basic_auth_user=process.env.AUTH_USER||"admin";
 var basic_auth_pass=process.env.AUTH_PASS||"d3m0";
 
 // Sqlite Schema 
 // id,file,deployment,graph,date,ip
-db.run("CREATE TABLE if not exists USER_UPLOADS (id INTEGER PRIMARY KEY AUTOINCREMENT,file TEXT,deployment TEXT,graph TEXT,date TEXT,ip TEXT)");
+db.run("CREATE TABLE if not exists USER_UPLOADS (id INTEGER PRIMARY KEY AUTOINCREMENT,file TEXT,deployment TEXT,graph TEXT,date TEXT,ip TEXT,status TEXT)");
 // db.run("DROP TABLE USER_UPLOADS");
 
+var CONSTANTS={
+  pending:"pending",
+  processing:"processing",
+  error:"error",
+  finished:"finished"
+};
 
 /*==============*/
 // MY BASIC AUTH IMPLEMENTATION
@@ -89,41 +97,6 @@ app.post('/upload', function(req, res){
 });
 
 app.get('/import', function(req, res) {
-  var env = Object.create( process.env );
-  env.file = req.query.file;
-  env.g = req.query.graph || "dssdata";
-  env.d = req.query.deployment || "duth";
-  env.DBA_PASS = env.DBA_PASS || env.AUTH_PASS;
-  var command = spawn(__dirname + "/import.sh", { env: env });
-  var output  = [];
-
-  command.stdout.on('data', function(chunk) {
-    output.push(chunk); 
-  }); 
-
-  command.on('close', function(code) {
-    var decoder = new StringDecoder('utf8'); //'utf8'
-    if (code === 0) {
-      var response = decoder.write(Buffer.concat(output)).trim();
-      
-      // handle response type
-      var response_type = response.indexOf("Error")>=0?"warning":"success";
-      if(response_type==="success" || process.env.BETA) {
-        res.status(200).json({type:response_type,message:response});
-        saveImport({
-          file:env.file,
-          graph:env.g,
-          deployment:env.d
-        });
-      } else {
-        res.status(200).json({type:response_type,message:response});
-      }
-      
-    }
-    else {
-      res.send(500); // when the script fails, generate a Server Error HTTP response
-    }
-  });
 });
 
 var server = app.listen(process.env.PORT, function(){
@@ -131,14 +104,67 @@ var server = app.listen(process.env.PORT, function(){
 });
 
 
-function saveImport(data){  
-  // id,file,deployment,graph,date,ip
-  db.run("INSERT INTO USER_UPLOADS VALUES (NULL, ?, ?, ?, ?, ?)", [
-  data.file,
-  data.deployment,
-  data.graph,
-  new Date().toString(),
-  "undefined",
+function addRequest(data,request){  
+  // id,file,deployment,graph,date,ip,status
+  db.run("INSERT INTO USER_UPLOADS VALUES (NULL, ?, ?, ?, ?, ?, ?)", [
+    data.file,
+    data.deployment,
+    data.graph,
+    new Date().toString(),
+    (request.headers['x-forwarded-for'] || request.connection.remoteAddress),
+    CONSTANTS.pending
   ]);
+}
 
+function updateRequest(id,status,cb) {
+  db.run("UPDATE USER_UPLOADS SET status=? WHERE id=?", [status,id], function(err,result){ cb(err,result);});
+}
+
+function importData(data,cb){
+  
+  var env = Object.create( process.env );
+  env.file = data.file;
+  env.g = data.graph || "dssdata";
+  env.d = data.deployment || "duth";
+  
+  env.DBA_PASS = env.DBA_PASS || env.AUTH_PASS;
+  var command = spawn(__dirname + "/import.sh", { env: env });
+  var output  = [];
+  command.stdout.on('data', function(chunk) { output.push(chunk); }); 
+  command.on('close', function(code) {
+    var decoder = new StringDecoder('utf8'); //'utf8'
+    if (code === 0) {
+      var response = decoder.write(Buffer.concat(output)).trim();
+      var response_type = (response.indexOf("Error")>=0 && !process.env.BETA)?"warning":"success";
+      // data object
+      var result = Object.assign({},data,{type:response_type,message:response});
+      cb(result);
+      
+    } else {
+      cb({error:code}); // when the script fails, generate a Server Error HTTP response
+    }
+  });
+}
+
+function sendEmail(data) {
+    var sendgrid=nodemailer.createTransport(sgTransport({
+        auth: {
+            api_key: process.env.SENDGRID_API_KEY||'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'
+        }
+    }));
+    
+    // send mail
+    sendgrid.sendMail({
+        from: 'importer@carre-project.eu',
+        to: process.env.EMAIL_TO?process.env.EMAIL_TO.split(";"):'portokallidis@gmail.com',
+        subject: 'CARRE RDF-importer: '+data.title+' ',
+        text: 'From user: '+user+'\n\n'+data
+    }, function(error, response) {
+       if (error) {
+            console.log(error);
+       } else {
+            console.log('Message sent');
+       }
+    });
+    
 }

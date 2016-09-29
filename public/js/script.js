@@ -62,7 +62,6 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
   function customDateSorting(a, b, rowA, rowB, direction){
     a = new Date(a).getTime()/1000;
     b = new Date(b).getTime()/1000;
-    console.log(a,b,direction);
     switch (direction) {
       case uiGridConstants.DESC:
         if (a == b) return 0;
@@ -75,7 +74,6 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
       default:
         // code
     }
-    return 1;
   }
   
   $scope.makeDate = function (str){
