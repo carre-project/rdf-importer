@@ -1,5 +1,5 @@
 #!/bin/bash
-USER=dba
+USER=${DBA_USER}
 PASS=${DBA_PASS}
 DEPLOYMENT=${d:-duth}
 ENDPOINT=${url:-"https://devices.${DEPLOYMENT}.carre-project.eu/sparql-auth"}

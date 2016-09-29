@@ -94,6 +94,7 @@ app.get('/import', function(req, res) {
   env.g = req.query.graph || "dssdata";
   env.d = req.query.deployment || "duth";
   env.DBA_PASS = env.DBA_PASS || env.AUTH_PASS;
+  env.DBA_USER = env.DBA_USER || env.AUTH_USER;
   var command = spawn(__dirname + "/import.sh", { env: env });
   var output  = [];
 
