@@ -68,6 +68,7 @@ app.get('/delete/:id', function(req, res) {
 });
 app.post('/upload', uploadFile);
 app.get('/import', addJob);
+app.get('/retry/:id', retryJob);
 
 var server = app.listen(PORT, function() {
   console.log('Server listening on port ' + PORT);
@@ -117,6 +118,18 @@ function addJob(req, res) {
     getIp(req),
     CONSTANTS.pending
   ],function(err, result) {
+    if(err) {
+      res.status(500).json({error:err});
+    } else {
+      res.status(200).json({status:CONSTANTS.success,message:"ok"});
+      processAllJobs();
+    }
+  });
+}
+
+function retryJob(req, res) {
+  // id,file,deployment,graph,date,ip,status
+  updateJob(req.params.id,CONSTANTS.pending,function(err, result) {
     if(err) {
       res.status(500).json({error:err});
     } else {

@@ -60,8 +60,9 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
       cellTemplate: '<div class="ui-grid-cell-contents">' +
         '<a class="btn btn-xs btn-primary" target="_blank" ng-href="/uploads/{{row.entity.file}}.xlsx"><i class="glyphicon glyphicon-file"></i></a> ' +
         '<a class="btn btn-xs btn-warning" target="_blank" ng-href="/uploads/{{row.entity.file}}_{{row.entity.deployment}}_{{row.entity.graph}}_log.txt"><i class="glyphicon glyphicon-wrench"></i></a> ' +
+        '<a ng-show="row.entity.status===\'error\'" class="btn btn-xs btn-info" target="_blank" href="" ng-click="retryImport(row.entity.id)">Retry</a> ' +
         '</div>',
-      width: 80
+      width: 100
 
     }]
   };
@@ -106,20 +107,34 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
   }
   $scope.resetScope();
   
+
   $scope.uploadFile = function() {
     $('#upload-input').click();
-  }
+  }  
+  
   $scope.importData = function() {
     var selectedGraph = $("#graph").val();
     var selectedDeployment = $("#deployment").val();
     $scope.loading_import=$http.get('/import?graph=' + selectedGraph + '&file=' + $scope.currentFile + '&deployment=' + selectedDeployment).then(function(res){
-      $timeout(function() {$scope.fetchHistory()}, 100);
-      $scope.message_color="alert-"+res.data.status;
-      $scope.message="Job Added. We will sent you an email when it's finished!";
-      $timeout(function(){$scope.message=null;},5000);
-    })
-    
+      showMessage(res);
+    });
   };
+  
+  $scope.retryImport = function(id) {
+    $http.get('/retry/'+id).then(function(res){
+      showMessage(res);
+    });
+
+  function showMessage(res) {
+    $timeout(function() {
+      $scope.fetchHistory();
+    }, 100);
+    $scope.message_color = "alert-" + res.data.status;
+    $scope.message = "Job Added. We will sent you an email when it's finished!";
+    $timeout(function() {
+      $scope.message = null;
+    }, 5000);
+  }
 
   $('#upload-input').on('change', function() {
     var files = $(this).get(0).files;
