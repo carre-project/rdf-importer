@@ -12,8 +12,8 @@
     "basic-auth": "^1.0.4",
     "express": "^4.13.3",
     "formidable": "^1.0.17",
-    "sqlite3": "^3.1.4",
-    "nodemailer": "^2.3.0",
-    "nodemailer-sendgrid-transport": "^0.2.0"
+    "nodemailer": "^2.6.4",
+    "nodemailer-sendgrid-transport": "^0.2.0",
+    "sqlite3": "^3.1.4"
   }
 }

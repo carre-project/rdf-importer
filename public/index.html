@@ -17,14 +17,17 @@
 
   <!-- Fixed navbar -->
   <nav class="navbar navbar-default">
-    <div class="container">
+    <div class="container-fluid">
       <div class="navbar-header">
         <a class="navbar-brand" href="#">
-          <span class="glyphicon glyphicon-cloud-upload"></span> CARRE RDF<sub>importer</sub></a>
+          <span class="glyphicon glyphicon-cloud-upload"></span> CARRE RDF<sub>importer</sub>
+        </a>
       </div>
     </div>
   </nav>
-  <div class="container ng-cloak">
+  <div ng-hide="gridOptions1" class="container well well-sm text-center" style="max-width:200px;"><h4>Loading...</h4></div>
+  
+  <div class="container-fluid ng-cloak">
     <div class="col-xs-12">
       <div class="alerts">
         <div class="alert alert-dismissible" ng-class="message_color" role="alert"  ng-show="message">
@@ -34,13 +37,13 @@
       </div>
 
     </div>
-    <div class="col-sm-4">
-      <div class "container">
+    <div class="col-sm-4 col-lg-3">
+      <div>
         <h4>Upload excel and import</h4>
         <hr>
 
         <div class="panel panel-default">
-          <div class="panel-body" cg-busy="loading_import">
+          <div class="panel-body text-center" cg-busy="loading_import">
 
             <div style="display:none" class="import panel-body">
               <div class="form-group">
@@ -64,18 +67,18 @@
             </div>
 
             <div class="progress">
-              <div class="progress-bar" role="progressbar"></div>
+              <div class="progress-bar" style="font-size: 1em;" role="progressbar"></div>
             </div>
-            <a class="col-xs-6 col-xs-offset-1 btn btn-primary upload-btn" href="" ng-click="uploadFile()">Upload <span class="glyphicon glyphicon-cloud-upload"></span></a>
-            <a class="col-xs-3 col-xs-offset-1 btn btn-danger" href="" ng-click="resetScope()">Reset</span></a>
+            <a class="btn btn-primary upload-btn" href="" ng-click="uploadFile()">Upload <span class="glyphicon glyphicon-cloud-upload"></span></a>
+            <a class="btn btn-danger" href="" ng-click="resetScope()">Reset</span></a>
           </div>
 
         </div>
 
       </div>
     </div>
-    <div class="col-sm-8">
-      <div class "container" cg-busy="loading">
+    <div class="col-sm-8 col-lg-9">
+      <div cg-busy="loading">
         <h4>History</h4>
         <hr>
         <div ui-grid="gridOptions1" 

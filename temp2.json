@@ -1,7 +1,7 @@
 {
 	"sparql_endpoint":"https://devices.vulsk.carre-project.eu/sparql-auth",
 	"target_graph":"http://carre.kmi.open.ac.uk/dssdata",
-	"excel_file":"public/uploads/risk_entry_system_v26_5_all_riskAlerts.xlsx",
+	"excel_file":"public/uploads/risk_entry_system_v26_6_all_riskAlerts.xlsx",
 	"insert_to_rdf":true,
 	"prefixes":[
 		"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>",

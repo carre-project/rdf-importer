@@ -30,6 +30,7 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
       width: 50
     },{
       name: 'file',
+      minWidth: 300
     }, {
       name: 'deployment',
       width: 80
@@ -45,6 +46,12 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
       sortingAlgorithm:customDateSorting,
       width: 130,
       cellTemplate: '<div class="ui-grid-cell-contents">{{grid.appScope.makeDate(row.entity.date)}}</div>'
+    }, {
+      name: 'status',
+      width: 80
+    }, {
+      name: 'ip',
+      width: 110
     }, {
       name: 'urls',
       displayName: 'Url / Log',
@@ -107,8 +114,9 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
     var selectedDeployment = $("#deployment").val();
     $scope.loading_import=$http.get('/import?graph=' + selectedGraph + '&file=' + $scope.currentFile + '&deployment=' + selectedDeployment).then(function(res){
       $timeout(function() {$scope.fetchHistory()}, 100);
-      $scope.message_color="alert-"+res.data.type;
-      $scope.message=res.data.message.replace(/\n/g, "<br />");
+      $scope.message_color="alert-"+res.data.status;
+      $scope.message="Job Added. We will sent you an email when it's finished!";
+      $timeout(function(){$scope.message=null;},5000);
     })
     
   };
