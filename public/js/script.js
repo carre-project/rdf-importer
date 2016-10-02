@@ -15,7 +15,7 @@ var app = angular.module('rdfImporter', [
   'ui.grid.autoResize'
   ]);
 
-app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', function($scope, $http, $timeout,uiGridConstants) {
+app.controller('MyCtrl', function($scope, $http, $timeout,uiGridConstants) {
   
   // id,file,deployment,graph,date,ip
   $scope.gridOptions1 = {
@@ -124,7 +124,8 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
     $http.get('/retry/'+id).then(function(res){
       showMessage(res);
     });
-
+  };
+  
   function showMessage(res) {
     $timeout(function() {
       $scope.fetchHistory();
@@ -181,4 +182,4 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
     }
   });
 
-}]);
+});
