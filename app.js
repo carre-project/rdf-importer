@@ -12,6 +12,7 @@ var db = new sqlite3.Database('sqlite/data.db');
 var nodemailer = require('nodemailer');
 var sgTransport = require('nodemailer-sendgrid-transport');
 
+var baseUrl = "http://importer.carre-project.eu/";
 var basic_auth_user = process.env.AUTH_USER || "admin";
 var basic_auth_pass = process.env.AUTH_PASS || "d3m0";
 var PORT = process.env.PORT || 9999;
@@ -138,6 +139,12 @@ function processJob(job, cb) {
 
   env.DBA_USER = env.DBA_USER || env.AUTH_USER;
   env.DBA_PASS = env.DBA_PASS || env.AUTH_PASS;
+  
+  env.DUTH_DBA_USER = env.DUTH_DBA_USER || env.DBA_USER;
+  env.DUTH_DBA_PASS = env.DUTH_DBA_PASS || env.DBA_PASS;
+  
+  env.VULSK_DBA_USER = env.VULSK_DBA_USER || env.DBA_USER;
+  env.VULSK_DBA_PASS = env.VULSK_DBA_PASS || env.DBA_PASS;
   var command = spawn(__dirname + "/import.sh", {
     env: env
   });
@@ -186,18 +193,23 @@ function uploadFile (req, res) {
 function sendEmail(status,result, job) {
   var sendgrid = nodemailer.createTransport(sgTransport({
     auth: {
-      api_key: process.env.SENDGRID_API_KEY || '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'
+      api_key: process.env.SENDGRID_API_KEY
     }
   }));
-
+  
+  // update status
+  job.status = status;
+  
   // send mail
   sendgrid.sendMail({
     from: 'importer@carre-project.eu',
     to: process.env.EMAIL_TO ? process.env.EMAIL_TO.split(";") : 'portokallidis@gmail.com',
-    subject: 'CARRE RDF-importer: '+job.graph+' : ' + status + ' by '+job.ip,
+    subject: 'CARRE RDF-importer: '+job.graph+' : '+job.deployment+' : '+ status,
     html:`
         <h3>Job Result: ${result.type}</h3>
         <p><b>Message</b>: ${result.message}</p>
+        <p><b><a href="${baseUrl}uploads/${job.file}_${job.deployment}_${job.graph}_log.txt">Logs</a></b></p>
+        <p><b><a href="${baseUrl}uploads/${job.file}.xlsx">Excel</a></b></p>
         <br>
         <h3>Job Details:</h3>
         <pre>${JSON.stringify(job, null, 2)}</pre>

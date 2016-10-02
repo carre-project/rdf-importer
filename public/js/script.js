@@ -59,7 +59,7 @@ app.controller('MyCtrl', ['$scope', '$http', '$timeout','uiGridConstants', funct
       enableColumnMenu: false,
       cellTemplate: '<div class="ui-grid-cell-contents">' +
         '<a class="btn btn-xs btn-primary" target="_blank" ng-href="/uploads/{{row.entity.file}}.xlsx"><i class="glyphicon glyphicon-file"></i></a> ' +
-        '<a class="btn btn-xs btn-warning" target="_blank" ng-href="/uploads/{{row.entity.file}}_log.txt"><i class="glyphicon glyphicon-wrench"></i></a> ' +
+        '<a class="btn btn-xs btn-warning" target="_blank" ng-href="/uploads/{{row.entity.file}}_{{row.entity.deployment}}_{{row.entity.graph}}_log.txt"><i class="glyphicon glyphicon-wrench"></i></a> ' +
         '</div>',
       width: 80
 
