@@ -3,21 +3,18 @@ var app = express();
 var path = require('path');
 var formidable = require('formidable');
 var fs = require('fs');
-var spawn   = require('child_process').spawn;
+var spawn = require('child_process').spawn;
 var StringDecoder = require('string_decoder').StringDecoder;
 var auth = require('basic-auth');
-var currentFilename="";
+var currentFilename = "";
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('sqlite/data.db');
+var nodemailer = require('nodemailer');
+var sgTransport = require('nodemailer-sendgrid-transport');
 
-var basic_auth_user=process.env.AUTH_USER||"admin";
-var basic_auth_pass=process.env.AUTH_PASS||"d3m0";
-
-// Sqlite Schema 
-// id,file,deployment,graph,date,ip
-db.run("CREATE TABLE if not exists USER_UPLOADS (id INTEGER PRIMARY KEY AUTOINCREMENT,file TEXT,deployment TEXT,graph TEXT,date TEXT,ip TEXT)");
-// db.run("DROP TABLE USER_UPLOADS");
-
+var basic_auth_user = process.env.AUTH_USER || "admin";
+var basic_auth_pass = process.env.AUTH_PASS || "d3m0";
+var PORT = process.env.PORT || 9999;
 
 /*==============*/
 // MY BASIC AUTH IMPLEMENTATION
@@ -30,116 +27,191 @@ var BasicAuth = function(req, res, next) {
   return next();
 };
 app.use(BasicAuth);
+app.use(express.static(path.join(__dirname, 'public')));
 /*==============*/
 
+var STATUS_IS_RUNNING = false;
+var CONSTANTS = {
+  pending: "pending",
+  processing: "processing",
+  error: "error",
+  success: "success",
+  
+  JOBS_TABLE: "JOB_QUEUE"
+};
 
-app.use(express.static(path.join(__dirname, 'public')));
+// Sqlite Schema 
+// id,file,deployment,graph,date,ip,status
+db.run("CREATE TABLE if not exists "+CONSTANTS.JOBS_TABLE+" (id INTEGER PRIMARY KEY AUTOINCREMENT,file TEXT,deployment TEXT,graph TEXT,date TEXT,ip TEXT,status TEXT)");
+// db.run("DROP TABLE "+CONSTANTS.JOBS_TABLE);
 
-app.get('/', function(req, res){
+
+
+/*=== Routes ===*/
+app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
-
-app.get('/history', function(req, res){
-  db.all("SELECT * FROM USER_UPLOADS", function(err, rows){
+app.get('/history', function(req, res) {
+  db.all("SELECT * FROM "+CONSTANTS.JOBS_TABLE, function(err, rows) {
     if (err) res.status(500).json(err);
     else res.status(200).json(rows);
     return;
   });
 });
-
-app.get('/delete/:id', function(req, res){
-  db.run("DELETE FROM USER_UPLOADS WHERE id="+req.params.id, function(err, result){
+app.get('/delete/:id', function(req, res) {
+  db.run("DELETE FROM "+CONSTANTS.JOBS_TABLE+" WHERE id=" + req.params.id, function(err, result) {
     if (err) res.status(500).json(err);
     else res.status(200).json(result);
     return;
   });
 });
+app.post('/upload', uploadFile);
+app.get('/import', addJob);
 
-app.post('/upload', function(req, res){
-  
-  // create an incoming form object
-  var form = new formidable.IncomingForm();
-
-  // specify that we want to allow the user to upload multiple files in a single request
-  form.multiples = false;
-
-  // store all uploads in the /uploads directory
-  form.uploadDir = path.join(__dirname, 'public/uploads/');
-
-  // every time a file has been uploaded successfully,
-  // rename it to it's orignal name
-  form.on('file', function(field, file) {
-    currentFilename=file.name;
-    fs.rename(file.path, path.join(form.uploadDir, file.name));
-  });
-
-  // log any errors that occur
-  form.on('error', function(err) {
-    console.log('An error has occured: \n' + err);
-  });
-
-  // once all the files have been uploaded, send a response to the client
-  form.on('end', function(file) {
-    res.end('success:'+currentFilename);
-  });
-
-  // parse the incoming request containing the form data
-  form.parse(req);
-
+var server = app.listen(PORT, function() {
+  console.log('Server listening on port ' + PORT);
 });
 
-app.get('/import', function(req, res) {
-  var env = Object.create( process.env );
-  env.file = req.query.file;
-  env.g = req.query.graph || "dssdata";
-  env.d = req.query.deployment || "duth";
+
+/* =========== Main-logic functions =============== */
+
+function processAllJobs() {
+  if (STATUS_IS_RUNNING) return;
+  STATUS_IS_RUNNING = true;
+  getJobs(function(err,jobs) {
+    if(err) {console.log(err); return false;}
+    if (jobs.length > 0) {
+      updateJob(jobs[0].id, CONSTANTS.processing, function() {
+        processJob(jobs[0], function(status, result,job) {
+          updateJob(job.id, status, function() {
+            STATUS_IS_RUNNING = false;
+            sendEmail(status,result,job);
+            processAllJobs();
+          });
+        });
+      });
+    }
+  });
+}
+
+function getJobs(cb) {
+  db.all("SELECT * FROM "+CONSTANTS.JOBS_TABLE+" WHERE status=?",[CONSTANTS.pending], function(err, result) {
+    if (err) cb(err,[]);
+    else {
+      var jobs = result.sort(function(a, b) {
+        return (new Date(b).getTime()) - (new Date(a).getTime());
+      });
+      cb(null,jobs);
+    }
+  });
+}
+
+function addJob(req, res) {
+  // id,file,deployment,graph,date,ip,status
+  db.run("INSERT INTO "+CONSTANTS.JOBS_TABLE+" VALUES (NULL, ?, ?, ?, ?, ?, ?)", [
+    req.query.file,
+    req.query.deployment,
+    req.query.graph,
+    new Date().toString(),
+    getIp(req),
+    CONSTANTS.pending
+  ],function(err, result) {
+    if(err) {
+      res.status(500).json({error:err});
+    } else {
+      res.status(200).json({status:CONSTANTS.success,message:"ok"});
+      processAllJobs();
+    }
+  });
+}
+
+function updateJob(id, status, cb) {
+  db.run("UPDATE "+CONSTANTS.JOBS_TABLE+" SET status=? WHERE id=?", [status, id], cb);
+}
+
+function processJob(job, cb) {
+ 
+  var env = Object.create(process.env);
+  env.file = job.file;
+  env.g = job.graph || "dssdata";
+  env.d = job.deployment || "duth";
+
   env.DBA_PASS = env.DBA_PASS || env.AUTH_PASS;
-  env.DBA_USER = env.DBA_USER || env.AUTH_USER;
-  var command = spawn(__dirname + "/import.sh", { env: env });
-  var output  = [];
-
+  var command = spawn(__dirname + "/import.sh", {
+    env: env
+  });
+  var output = [];
   command.stdout.on('data', function(chunk) {
-    output.push(chunk); 
-  }); 
-
+    output.push(chunk);
+  });
   command.on('close', function(code) {
     var decoder = new StringDecoder('utf8'); //'utf8'
     if (code === 0) {
       var response = decoder.write(Buffer.concat(output)).trim();
-      
-      // handle response type
-      var response_type = response.indexOf("Error")>=0?"warning":"success";
-      if(response_type==="success" || process.env.BETA) {
-        res.status(200).json({type:response_type,message:response});
-        saveImport({
-          file:env.file,
-          graph:env.g,
-          deployment:env.d
-        });
-      } else {
-        res.status(200).json({type:response_type,message:response});
-      }
-      
+      var status = (response.indexOf("Error") >= 0) ? CONSTANTS.error : CONSTANTS.success;
+      cb(status, {type:status,message: response},job);
+    }
+    else cb(CONSTANTS.error,{type:CONSTANTS.error,message: code},job);
+  });
+}
+
+
+function uploadFile (req, res) {
+  // Based on formidable npm package
+  var form = new formidable.IncomingForm();
+  form.multiples = false;
+  form.uploadDir = path.join(__dirname, 'public/uploads/');
+  
+  // rename it to it's orignal name
+  // TODO : if the file exists add an auto-increment integer like windows :D
+  form.on('file', function(field, file) {
+    currentFilename = file.name;
+    fs.rename(file.path, path.join(form.uploadDir, file.name));
+  });
+  
+  form.on('error', function(err) {
+    console.log('An error has occured: \n' + err);
+  });
+  
+  form.on('end', function(file) {
+    res.end('success:' + currentFilename);
+  });
+  
+  // parse the incoming request containing the form data
+  form.parse(req);
+}
+
+function sendEmail(status,result, job) {
+  var sendgrid = nodemailer.createTransport(sgTransport({
+    auth: {
+      api_key: process.env.SENDGRID_API_KEY || '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'
+    }
+  }));
+
+  // send mail
+  sendgrid.sendMail({
+    from: 'importer@carre-project.eu',
+    to: process.env.EMAIL_TO ? process.env.EMAIL_TO.split(";") : 'portokallidis@gmail.com',
+    subject: 'CARRE RDF-importer: '+job.graph+' : ' + status + ' by '+job.ip,
+    html:`
+        <h3>Job Result: ${result.type}</h3>
+        <p><b>Message</b>: ${result.message}</p>
+        <br>
+        <h3>Job Details:</h3>
+        <pre>${JSON.stringify(job, null, 2)}</pre>
+        `
+  }, function(error, response) {
+    if (error) {
+      console.log(error);
     }
     else {
-      res.send(500); // when the script fails, generate a Server Error HTTP response
+      console.log('Message sent');
     }
   });
-});
 
-var server = app.listen(process.env.PORT, function(){
-  console.log('Server listening on port '+process.env.PORT);
-});
+}
 
-
-function saveImport(data){  
-  // id,file,deployment,graph,date,ip
-  db.run("INSERT INTO USER_UPLOADS VALUES (NULL, ?, ?, ?, ?, ?)", [
-  data.file,
-  data.deployment,
-  data.graph,
-  new Date().toString(),
-  "undefined",
-  ]);
-
+function getIp(req){
+  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  return ip.slice(ip.lastIndexOf(":")+1);
 }

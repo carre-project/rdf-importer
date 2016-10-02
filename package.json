@@ -1,17 +1,19 @@
 {
-  "name": "file-uploader",
+  "name": "carre-rdfimporter",
   "version": "1.0.0",
-  "description": "An AJAX file uploader using JS and NodeJS",
+  "description": "This tool is responsible for inserting excel sheets into RDF repositories through sparql endpoints",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Fady Makram",
+  "author": "Nick Portokallidis",
   "license": "MIT",
   "dependencies": {
     "basic-auth": "^1.0.4",
     "express": "^4.13.3",
     "formidable": "^1.0.17",
+    "nodemailer": "^2.6.4",
+    "nodemailer-sendgrid-transport": "^0.2.0",
     "sqlite3": "^3.1.4"
   }
 }
