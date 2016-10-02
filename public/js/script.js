@@ -60,9 +60,9 @@ app.controller('MyCtrl', function($scope, $http, $timeout,uiGridConstants) {
       cellTemplate: '<div class="ui-grid-cell-contents">' +
         '<a class="btn btn-xs btn-primary" target="_blank" ng-href="/uploads/{{row.entity.file}}.xlsx"><i class="glyphicon glyphicon-file"></i></a> ' +
         '<a class="btn btn-xs btn-warning" target="_blank" ng-href="/uploads/{{row.entity.file}}_{{row.entity.deployment}}_{{row.entity.graph}}_log.txt"><i class="glyphicon glyphicon-wrench"></i></a> ' +
-        '<a ng-show="row.entity.status===\'error\'" class="btn btn-xs btn-info" target="_blank" href="" ng-click="retryImport(row.entity.id)">Retry</a> ' +
+        '<a ng-show="row.entity.status===\'error\'" class="btn btn-xs btn-info" target="_blank" href="" ng-click="grid.appScope.retryImport(row.entity.id)">Retry</a> ' +
         '</div>',
-      width: 100
+      width: 110
 
     }]
   };
