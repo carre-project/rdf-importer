@@ -136,6 +136,7 @@ function processJob(job, cb) {
   env.g = job.graph || "dssdata";
   env.d = job.deployment || "duth";
 
+  env.DBA_USER = env.DBA_USER || env.AUTH_USER;
   env.DBA_PASS = env.DBA_PASS || env.AUTH_PASS;
   var command = spawn(__dirname + "/import.sh", {
     env: env
