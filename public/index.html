@@ -25,18 +25,12 @@
       </div>
     </div>
   </nav>
+  
+  <toaster-container toaster-options="{'time-out': 7000, 'close-button':true, 'animation-class': 'toast-top-right'}"></toaster-container>
+
   <div ng-hide="gridOptions1" class="container well well-sm text-center" style="max-width:200px;"><h4>Loading...</h4></div>
   
   <div class="container-fluid ng-cloak">
-    <div class="col-xs-12">
-      <div class="alerts">
-        <div class="alert alert-dismissible" ng-class="message_color" role="alert"  ng-show="message">
-          <button type="button" ng-click="message=null" class="close" aria-label="Close"><span class="glyphicon glyphicon-remove"></span></button>
-          <span ng-bind-html="message"></span>
-        </div>
-      </div>
-
-    </div>
     <div class="col-sm-4 col-lg-3">
       <div>
         <h4>Upload excel and import</h4>
@@ -97,8 +91,9 @@
   <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-sanitize.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.min.js"></script>
   <script src="https://cdn.rawgit.com/angular-ui/bower-ui-grid/v3.1.1/ui-grid.min.js"></script>
-  <script src="js/angular-busy.js"></script>
+  <script src="js/libs.js"></script>
   <script src="js/script.js"></script>
 </body>
 

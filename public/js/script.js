@@ -12,10 +12,12 @@ var app = angular.module('rdfImporter', [
   // 'ui.grid.exporter',
   // 'ui.grid.grouping',
   'ui.grid.pagination',
-  'ui.grid.autoResize'
+  'ui.grid.autoResize',
+  'ngAnimate',
+  'toaster'
   ]);
 
-app.controller('MyCtrl', function($scope, $http, $timeout,uiGridConstants) {
+app.controller('MyCtrl', function($scope, $http, $timeout,uiGridConstants,toaster) {
   
   // id,file,deployment,graph,date,ip
   $scope.gridOptions1 = {
@@ -106,7 +108,6 @@ app.controller('MyCtrl', function($scope, $http, $timeout,uiGridConstants) {
     $('#upload-input').val('');
   }
   $scope.resetScope();
-  
 
   $scope.uploadFile = function() {
     $('#upload-input').click();
@@ -130,11 +131,11 @@ app.controller('MyCtrl', function($scope, $http, $timeout,uiGridConstants) {
     $timeout(function() {
       $scope.fetchHistory();
     }, 100);
-    $scope.message_color = "alert-" + res.data.status;
-    $scope.message = "Job Added. We will sent you an email when it's finished!";
-    $timeout(function() {
-      $scope.message = null;
-    }, 5000);
+    toaster.pop({
+        type: res.data.status,
+        title: "Job:"+res.data.status,
+        body: "We will sent you an email when it's finished!",
+    });
   }
 
   $('#upload-input').on('change', function() {
