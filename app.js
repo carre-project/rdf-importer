@@ -219,6 +219,7 @@ function sendEmail(status,result, job) {
     to: process.env.EMAIL_TO ? process.env.EMAIL_TO.split(";") : 'portokallidis@gmail.com',
     subject: 'CARRE RDF-importer: '+job.deployment+' : '+job.graph+' : ' + status,
     html:`
+        <h2><a href="${baseUrl}" target="_blank">CARRE RDF<sub>importer</sub></a></h2>
         <h3>Job Result: ${result.type}</h3>
         <p><b>Message:</b> ${result.message}</p>
         <p><b>Logs:</b> <a href="${baseUrl}uploads/${job.file}_${job.deployment}_${job.graph}_log.txt">${job.file}_${job.deployment}_${job.graph}_log.txt</a></p>
