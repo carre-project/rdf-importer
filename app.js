@@ -46,8 +46,6 @@ var CONSTANTS = {
 db.run("CREATE TABLE if not exists "+CONSTANTS.JOBS_TABLE+" (id INTEGER PRIMARY KEY AUTOINCREMENT,file TEXT,deployment TEXT,graph TEXT,date TEXT,ip TEXT,status TEXT)");
 // db.run("DROP TABLE "+CONSTANTS.JOBS_TABLE);
 
-
-
 /*=== Routes ===*/
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname, 'public/index.html'));
@@ -73,7 +71,6 @@ app.get('/retry/:id', retryJob);
 var server = app.listen(PORT, function() {
   console.log('Server listening on port ' + PORT);
 });
-
 
 /* =========== Main-logic functions =============== */
 
@@ -182,26 +179,21 @@ function uploadFile (req, res) {
   var form = new formidable.IncomingForm();
   form.multiples = false;
   form.uploadDir = path.join(__dirname, 'public/uploads/');
-  
   // rename it to it's orignal name
   // TODO : if the file exists add an auto-increment integer like windows :D
   form.on('file', function(field, file) {
     currentFilename = file.name;
     fs.rename(file.path, path.join(form.uploadDir, file.name));
   });
-  
   form.on('error', function(err) {
     console.log('An error has occured: \n' + err);
   });
-  
   form.on('end', function(file) {
     res.end('success:' + currentFilename);
   });
-  
   // parse the incoming request containing the form data
   form.parse(req);
 }
-
 
 function sendEmail(status,result, job) {
   var sendgrid = nodemailer.createTransport(sgTransport({
@@ -209,10 +201,8 @@ function sendEmail(status,result, job) {
       api_key: process.env.SENDGRID_API_KEY
     }
   }));
-  
   // update status
   job.status = status;
-  
   // send mail
   sendgrid.sendMail({
     from: 'importer@carre-project.eu',
@@ -236,7 +226,6 @@ function sendEmail(status,result, job) {
       console.log('Message sent');
     }
   });
-
 }
 
 function getIp(req){
