@@ -220,7 +220,7 @@ function sendEmail(status,result, job) {
     subject: 'CARRE RDF-importer: '+job.deployment+' : '+job.graph+' : ' + job.status,
     html:`
         <h2><a href="${baseUrl}" target="_blank" style="text-decoration: none;">CARRE RDF importer</a></h2>
-        <h3>Job #${job.id} in <span style="text-decoration: underline;">${job.deployment}<span> vm for /<span style="text-decoration: underline;">${job.graph}</span> resulted in <span style="text-decoration: underline;">${job.status}</span> on ${new Date().split(' (')[0]}</h3>
+        <h3>Job #${job.id} in <span style="text-decoration: underline;">${job.deployment}</span> vm for /<span style="text-decoration: underline;">${job.graph}</span> resulted in <span style="text-decoration: underline;">${job.status}</span> on ${new Date().split(' (')[0]}</h3>
         <p><b>Message:</b> ${result.message}</p>
         <p><b>Logs:</b> <a href="${baseUrl}uploads/${job.file}_${job.deployment}_${job.graph}_log.txt">${job.file}_${job.deployment}_${job.graph}_log.txt</a></p>
         <p><b>Excel:</b> <a href="${baseUrl}uploads/${job.file}.xlsx">${job.file}.xlsx</a></p>
