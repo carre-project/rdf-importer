@@ -217,10 +217,10 @@ function sendEmail(status,result, job) {
   sendgrid.sendMail({
     from: 'importer@carre-project.eu',
     to: process.env.EMAIL_TO ? process.env.EMAIL_TO.split(";") : 'portokallidis@gmail.com',
-    subject: 'CARRE RDF-importer: '+job.deployment+' : '+job.graph+' : ' + status,
+    subject: 'CARRE RDF-importer: '+job.deployment+' : '+job.graph+' : ' + job.status,
     html:`
-        <h2><a href="${baseUrl}" target="_blank">CARRE RDF<sub>importer</sub></a></h2>
-        <h3>Job Result: ${result.type}</h3>
+        <h2><a href="${baseUrl}" target="_blank" style="text-decoration: none;">CARRE RDF importer</a></h2>
+        <h3>Job #${job.id} in ${job.deployment} vm for /${job.graph} resulted in ${job.status} on ${job.date.split(' (')[0]}</h3>
         <p><b>Message:</b> ${result.message}</p>
         <p><b>Logs:</b> <a href="${baseUrl}uploads/${job.file}_${job.deployment}_${job.graph}_log.txt">${job.file}_${job.deployment}_${job.graph}_log.txt</a></p>
         <p><b>Excel:</b> <a href="${baseUrl}uploads/${job.file}.xlsx">${job.file}.xlsx</a></p>
