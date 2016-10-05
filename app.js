@@ -67,6 +67,7 @@ app.get('/delete/:id', function(req, res) {
 app.post('/upload', uploadFile);
 app.get('/import', addJob);
 app.get('/retry/:id', retryJob);
+app.get('/manual_start', manualProcessAllJobs);
 
 var server = app.listen(PORT, function() {
   console.log('Server listening on port ' + PORT);
@@ -78,7 +79,7 @@ function processAllJobs() {
   if (STATUS_IS_RUNNING) return;
   STATUS_IS_RUNNING = true;
   getJobs(function(err,jobs) {
-    if(err) {console.log(err); return false;}
+    if(err) {console.log(err); return;}
     if (jobs.length > 0) {
       updateJob(jobs[0].id, CONSTANTS.processing, function() {
         processJob(jobs[0], function(status, result,job) {
@@ -134,6 +135,12 @@ function retryJob(req, res) {
       processAllJobs();
     }
   });
+}
+
+function manualProcessAllJobs(req, res) {
+  // id,file,deployment,graph,date,ip,status
+  res.status(200).json({STATUS_IS_RUNNING:STATUS_IS_RUNNING});
+  processAllJobs();
 }
 
 function updateJob(id, status, cb) {
