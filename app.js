@@ -32,6 +32,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 /*==============*/
 
 var STATUS_IS_RUNNING = false;
+var PREV_STATUS = false;
+
 var CONSTANTS = {
   pending: "pending",
   processing: "processing",
@@ -72,6 +74,12 @@ app.get('/manual_start', manualProcessAllJobs);
 var server = app.listen(PORT, function() {
   console.log('Server listening on port ' + PORT);
 });
+
+/* === fix if stuck  ===*/
+setInterval(function() {
+  if(PREV_STATUS===STATUS_IS_RUNNING && PREV_STATUS === true) processAllJobs();
+  else PREV_STATUS=STATUS_IS_RUNNING;
+},3600000)
 
 /* =========== Main-logic functions =============== */
 
@@ -139,6 +147,7 @@ function retryJob(req, res) {
 
 function manualProcessAllJobs(req, res) {
   // id,file,deployment,graph,date,ip,status
+  STATUS_IS_RUNNING = false;
   res.status(200).json({STATUS_IS_RUNNING:STATUS_IS_RUNNING});
   processAllJobs();
 }
