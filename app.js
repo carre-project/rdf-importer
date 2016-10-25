@@ -77,9 +77,11 @@ var server = app.listen(PORT, function() {
 
 /* === fix if stuck  ===*/
 setInterval(function() {
-  if(PREV_STATUS===STATUS_IS_RUNNING && PREV_STATUS === true) processAllJobs();
-  else PREV_STATUS=STATUS_IS_RUNNING;
-},3600000)
+  if(PREV_STATUS===STATUS_IS_RUNNING && PREV_STATUS === true) {
+    STATUS_IS_RUNNING = false;
+    processAllJobs();
+  } else PREV_STATUS=STATUS_IS_RUNNING;
+},3600000);
 
 /* =========== Main-logic functions =============== */
 
