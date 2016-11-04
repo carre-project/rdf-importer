@@ -1,5 +1,19 @@
 ## CARRE RDF Importer
-This tool is responsible for inserting excel sheets into RDF repositories through sparql endpoints
+
+#### Overview
+RDF Importer was developed to address some of the issues we were having in batch update and data migration of the RDF graphs. 
+
+It’s initial concept was a simple cli-based tool that is responsible for converting excel-formatted data into RDF datastores. 
+
+This component is integrated with a CSV schema that is based on CARRE ontologies and it’s initial design was to parse tabular data into triples for the purpose of later importing them into RDF databases. 
+
+After an extensive internal usage within the DUTH team we decided to make it available within CARRE for all of our partners. 
+
+More specific it consists of :
+- CLI-tool, which is responsible for importing an excel file to specific rdf graph in a specific rdf database
+- Web GUI, which is available at https://importer.carre-project.eu ,using CARRE credentials
+- API server, which implements a custom pipeline (queue) for concurrently handling multiple jobs. It is also responsible for sending email reports of each job upon completion.
+
 
 #### Development 
 - install nodejs 
